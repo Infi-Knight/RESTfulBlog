@@ -1,4 +1,4 @@
-var bodyParser = require("bodyParser"),
+var bodyParser = require("body-parser"),
     mongoose   = require("mongoose"),
     express    = require("express"),
     app        = express();
@@ -19,7 +19,27 @@ var blogSchema = new mongoose.Schema({
 
 var Blog = mongoose.model("Blog", blogSchema);
 
+// Blog.create({
+//   title: "Audace",
+//   image: "https://unsplash.com/search/photos/macbook?photo=8u5JvXfp4uw",
+//   body: "Let's get started"
+// })
+
 // ROUTES
+app.get("/", function(req, res){
+  res.redirect("/blogs");
+})
+
+// REST INDEX for blogs
+app.get("/blogs", function(req, res){
+  Blog.find({}, function(err, blogs){
+    if (err) {
+      console.log(err);
+    } else {
+        res.render("index", {blogs: blogs});      
+    }
+  });
+});
 
 // Listener for our blog site
 app.listen(3000, process.env.IP, function(){
