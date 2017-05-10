@@ -1,6 +1,10 @@
+#delete_button {
+  display: inline;
+}
+
 i.icon {
   font-size: 2em;
-  color: lime;
+  color: red;
 }
 
 .container.main {

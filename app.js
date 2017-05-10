@@ -1,4 +1,6 @@
+// NOTE: methodOverride and expressSanitizer should come after bodyParser
 var bodyParser = require("body-parser"),
+    expressSanitizer = require("express-sanitizer"),
     methodOverride = require("method-override"),
     mongoose   = require("mongoose"),
     express    = require("express"),
@@ -9,16 +11,8 @@ mongoose.connect("mongodb://localhost/restful_blog_app");
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(expressSanitizer());
 app.use(methodOverride("_method"));
-
-// app.use(methodOverride(function(req, res){
-//   if (req.body && typeof req.body === 'object' && '_method' in req.body) {
-//     // look in urlencoded POST bodies and delete it
-//     var method = req.body._method
-//     delete req.body._method
-//     return method
-//   }
-// }))
 
 // MONGOOSE/MODEL CONFIG
 var blogSchema = new mongoose.Schema({
@@ -29,12 +23,6 @@ var blogSchema = new mongoose.Schema({
 });
 
 var Blog = mongoose.model("Blog", blogSchema);
-
-// Blog.create({
-//   title: "Audace",
-//   image: "https://unsplash.com/search/photos/macbook?photo=8u5JvXfp4uw",
-//   body: "Let's get started"
-// })
 
 // ROUTES
 app.get("/", function(req, res){
@@ -59,6 +47,8 @@ app.get("/blogs/new", function(req, res){
 
 // REST CREATE ROUTE
 app.post("/blogs", function(req, res){
+  // Sanitize the incoming description to get rid of any malicious scripts
+  req.body.blog.body = req.sanitize(req.body.blog.body);
   // Create a new blog and then redirect to INDEX
   Blog.create(req.body.blog, function(err, newBlog){
     if(err) {
@@ -93,12 +83,32 @@ app.get("/blogs/:id/edit", function(req, res){
 
 // REST UPDATE ROUTE
 app.put("/blogs/:id", function(req, res){
+  // NOTE the use of req.params.id  If you tried req.body.id you would be
+  // really really extremely fucked as you will find that it returns undefined
+  // which neither updates the database nor gives you a hint of that
+  
+  // Sanitize the incoming description to get rid of any malicious scripts
+  req.body.blog.body = req.sanitize(req.body.blog.body);
+  
   Blog.findByIdAndUpdate(req.params.id, req.body.blog, {new: true}, function(err, updatedBlog){
     if (err) {
       console.log("UNABLE TO UPDATE THE BLOG");
       console.log(err);
     } else {
       res.redirect("/blogs/" + req.params.id);
+    }
+  });
+});
+
+// REST DELETE ROUTE
+app.delete("/blogs/:id", function(req, res){
+//   res.send("Expelliarmus..");
+  // destroy the blog
+  Blog.findByIdAndRemove(req.params.id, function(err){
+    if (err) {
+      res.redirect("/blogs");
+    } else {
+      res.redirect("/blogs");
     }
   });
 });
