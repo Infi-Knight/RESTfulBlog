@@ -41,7 +41,24 @@ app.get("/blogs", function(req, res){
   });
 });
 
+// REST NEW ROUTE
+app.get("/blogs/new", function(req, res){
+  res.render("new");
+});
+
+// REST CREATE ROUTE
+app.post("/blogs", function(req, res){
+  // Create a new blog and then redirect to INDEX
+  Blog.create(req.body.blog, function(err, newBlog){
+    if(err) {
+      res.render("new");
+    } else {
+      res.redirect("/blogs");
+    }
+  });
+});
+
 // Listener for our blog site
 app.listen(3000, process.env.IP, function(){
-  console.log("Your blog site server has started  :)");
+  console.log("Your blog site server has started :)");
 });
