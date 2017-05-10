@@ -3,7 +3,7 @@
 <div class="ui main text container segment">
   <div class="ui huge header">EDIT <%= blog.title %></div>
   <!-- METHOD OVERRIDE BECAUSE HTML FORMS DON'T SUPPORT PUT REQUESTS -->
-  <form class="ui form" action="/blogs/<%= blog._id %>?_method=PUT" method="POST">
+  <form method="POST" class="ui form" action="/blogs/<%= blog._id %>?_method=PUT">
     <div class="field">
       <div class="label">
         Title

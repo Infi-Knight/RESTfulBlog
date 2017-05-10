@@ -9,16 +9,16 @@ mongoose.connect("mongodb://localhost/restful_blog_app");
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
-// app.use(methodOverride("_method"));
+app.use(methodOverride("_method"));
 
-app.use(methodOverride(function(req, res){
-  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
-    // look in urlencoded POST bodies and delete it
-    var method = req.body._method
-    delete req.body._method
-    return method
-  }
-}))
+// app.use(methodOverride(function(req, res){
+//   if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+//     // look in urlencoded POST bodies and delete it
+//     var method = req.body._method
+//     delete req.body._method
+//     return method
+//   }
+// }))
 
 // MONGOOSE/MODEL CONFIG
 var blogSchema = new mongoose.Schema({
@@ -84,7 +84,7 @@ app.get("/blogs/:id", function(req, res){
 app.get("/blogs/:id/edit", function(req, res){
   Blog.findById(req.params.id, function(err, foundBlog){
     if (err) {
-      res.redirect("/blogs");
+      console.log("EDIT PAGE WAS NOT SHOWN");
     } else {
         res.render("edit", {blog: foundBlog}); 
     }
@@ -93,12 +93,12 @@ app.get("/blogs/:id/edit", function(req, res){
 
 // REST UPDATE ROUTE
 app.put("/blogs/:id", function(req, res){
-  Blog.findByIdAndUpdate(req.body.id, req.body.blog, function(err, updatedBlog){
+  Blog.findByIdAndUpdate(req.params.id, req.body.blog, {new: true}, function(err, updatedBlog){
     if (err) {
-      res.redirect("/blogs");
+      console.log("UNABLE TO UPDATE THE BLOG");
+      console.log(err);
     } else {
       res.redirect("/blogs/" + req.params.id);
-      console.log(req.body.blog);
     }
   });
 });
